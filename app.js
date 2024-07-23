@@ -12,7 +12,7 @@ var app = express();
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "jade");
-// Use body-parser to parse JSON bodiess
+// Use body-parser to parse JSON bodies
 app.use(bodyParser.json());
 
 app.use(logger("dev"));
