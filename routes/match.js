@@ -23,7 +23,7 @@ matchRouter
     res.setHeader("Content-Type", "application/json");
     res.json({
       message: "Success",
-      data: `Users Added Success in ${customData.contentType} format`,
+      data: `Users Added Success in ${customData.contentType} format `,
     });
   });
 
