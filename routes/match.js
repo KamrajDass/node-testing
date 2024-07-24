@@ -1,15 +1,13 @@
 var express = require("express");
 const bodyParser = require("body-parser");
-const auth = require("../middleware/auth");
-const checkContentType = require("../middleware/checkContentType");
 
 /* GET users listing. */
 
-const userRouter = express.Router();
+const matchRouter = express.Router();
 
-userRouter.use(bodyParser.json());
+matchRouter.use(bodyParser.json());
 
-userRouter
+matchRouter
   .route("/")
   .get((req, res, next) => {
     res.statusCode = 200;
@@ -19,7 +17,7 @@ userRouter
       data: `Urser Retrived Success`,
     });
   })
-  .post(auth, checkContentType, (req, res, next) => {
+  .post((req, res, next) => {
     const customData = req.customData;
     res.statusCode = 200;
     res.setHeader("Content-Type", "application/json");
@@ -29,15 +27,19 @@ userRouter
     });
   });
 
-userRouter
+matchRouter
   .route("/:matchId/palyer/:playerId")
-  .get(auth, function (req, res, next) {
+  .get(function (req, res, next) {
     res.statusCode = 200;
     res.setHeader("Content-Type", "application/json");
     res.json({
       message: "Success",
       data: `Fetched matchId: ${req.params.matchId}, playerId: ${req.params.playerId}`,
     });
+  })
+  .post((req, res, next) => {
+    res.statusCode = 403;
+    res.end("POST operation not supported on /playerId/" + req.params.dishId);
   });
 
-module.exports = userRouter;
+module.exports = matchRouter;

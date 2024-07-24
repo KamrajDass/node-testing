@@ -5,8 +5,11 @@ var cookieParser = require("cookie-parser");
 var logger = require("morgan");
 const bodyParser = require("body-parser");
 var indexRouter = require("./routes/index");
-var usersRouter = require("./routes/match");
-
+var matchRouter = require("./routes/match");
+const checkContentType = require("./middleware/checkContentType");
+const logRequestUrl = require("./middleware/logRequestUrl");
+const auth = require("./middleware/auth");
+const errorHandler = require("./middleware/errorMiddleware");
 var app = express();
 
 // view engine setup
@@ -20,10 +23,15 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
-
+// Apply the middleware to log requested url for all routes
+app.use(logRequestUrl);
+// Apply the middleware to checkContentType for all routes
+app.use(checkContentType);
 app.use("/", indexRouter);
-app.use("/match", usersRouter);
-// app.use("/checkDataType", usersRouter);
+app.use("/match", auth, matchRouter);
+
+// Apply the error handling middleware
+app.use(errorHandler);
 
 // catch 404 and forward to error handlerrr
 app.use(function (req, res, next) {

@@ -16,6 +16,7 @@ const basicAuth = require("basic-auth");
 // };
 
 const auth = (req, res, next) => {
+  console.log("authMiddleware");
   const authHeader = req.headers["authorization"];
   if (!authHeader) {
     res.set("WWW-Authenticate", 'Basic realm="example"');
