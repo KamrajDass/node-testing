@@ -34,9 +34,9 @@ const conectWS = (server) => {
     console.log("New WebSocket client connected");
     //const parsedUrl = url.parse(request.url, true);
     // const queryParams = parsedUrl.query;
-    mySet.add(ws);
+    // mySet.add(ws);
     //key value pair..
-    sendData();
+    // sendData();
     ws.on("message", (message) => {
       console.log("Received:", message);
 
