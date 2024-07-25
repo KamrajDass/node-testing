@@ -6,7 +6,6 @@ var logger = require("morgan");
 const bodyParser = require("body-parser");
 var indexRouter = require("./routes/index");
 var matchRouter = require("./routes/match");
-var messageRouter = require("./routes/messageRouter");
 const checkContentType = require("./middleware/checkContentType");
 const logRequestUrl = require("./middleware/logRequestUrl");
 const auth = require("./middleware/auth");
@@ -30,7 +29,7 @@ app.use(logRequestUrl);
 app.use(checkContentType);
 app.use("/", indexRouter);
 app.use("/match", auth, matchRouter);
-app.use("/message", auth, messageRouter);
+
 // catch 404 and forward to error handlerrr
 app.use(function (req, res, next) {
   next(createError(404));
