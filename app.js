@@ -1,5 +1,6 @@
 var createError = require("http-errors");
 var express = require("express");
+const { publishMessage, subscribeToChannel } = require('./middleware/pubnubService');
 var path = require("path");
 var cookieParser = require("cookie-parser");
 var logger = require("morgan");
@@ -31,6 +32,12 @@ app.use(checkContentType);
 app.use("/", indexRouter);
 app.use("/match", auth, matchRouter);
 app.use("/message", auth, messageRouter);
+
+app.post('/publish', (req, res) => {
+  const { channel, message } = req.body;
+  publishMessage(channel, message);
+  res.send('Message published');
+});
 // catch 404 and forward to error handlerrr
 app.use(function (req, res, next) {
   next(createError(404));
@@ -46,5 +53,7 @@ app.use(function (err, req, res, next) {
   res.status(err.status || 500);
   res.render("error");
 });
+
+
 
 module.exports = app;
