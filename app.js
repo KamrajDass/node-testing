@@ -1,44 +1,57 @@
 var createError = require("http-errors");
 var express = require("express");
-const { publishMessage, subscribeToChannel } = require('./middleware/pubnubService');
 var path = require("path");
-var cookieParser = require("cookie-parser");
 var logger = require("morgan");
-const bodyParser = require("body-parser");
+const mongoose = require("mongoose");
+var session = require("express-session");
+const FileStore = require("session-file-store")(session); // Import the file store
+var authenticate = require("./authenticate");
+const passport = require("passport");
 var indexRouter = require("./routes/index");
-var matchRouter = require("./routes/match");
-var messageRouter = require("./routes/messageRouter");
-const checkContentType = require("./middleware/checkContentType");
-const logRequestUrl = require("./middleware/logRequestUrl");
-const auth = require("./middleware/auth");
-// const errorHandler = require("./middleware/errorMiddleware");
+var usersRouter = require("./routes/users");
+var productRouter = require("./routes/productRouter");
+let uploadRouter = require("./routes/firebaseUploaderRouter");
+const cors = require("cors"); // Add this line
+const config = require("./config");
 var app = express();
-
+app.use(cors()); // Add this line
+// Connect to MongoDB
+const url = config.mongoUrl;
+mongoose
+  .connect(url)
+  .then(() => console.log("Connected to MongoDB"))
+  .catch((err) => console.error("Could not connect to MongoDB:", err));
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "jade");
-// Use body-parser to parse JSON bodiessss
-app.use(bodyParser.json());
 
 app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
-app.use(express.static(path.join(__dirname, "public")));
-// Apply the middleware to log requested url for all routes
-app.use(logRequestUrl);
-// Apply the middleware to checkContentType for all routes
-app.use(checkContentType);
-app.use("/", indexRouter);
-app.use("/match", auth, matchRouter);
-app.use("/message", auth, messageRouter);
 
-app.post('/publish', (req, res) => {
-  const { channel, message } = req.body;
-  publishMessage(channel, message);
-  res.send('Message published');
-});
-// catch 404 and forward to error handlerrr
+app.use(express.static(path.join(__dirname, "public")));
+// Set up session with FileStore
+app.use(
+  session({
+    name: "session-id",
+    secret: "12345-67890-09876-54321", // Replace with a secure  key
+    saveUninitialized: false,
+    resave: false,
+    store: new FileStore({}), // FileStore options can be customized here
+    cookie: { secure: false }, // Set `secure: true` in production with HTTPS
+  })
+);
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+app.use("/", indexRouter);
+app.use("/users", usersRouter);
+
+// Use the products router for routes starting with '/products'
+app.use("/products", productRouter);
+app.use("/upload", uploadRouter);
+// catch 404 and forward to error handler
 app.use(function (req, res, next) {
   next(createError(404));
 });
@@ -53,7 +66,5 @@ app.use(function (err, req, res, next) {
   res.status(err.status || 500);
   res.render("error");
 });
-
-
 
 module.exports = app;
